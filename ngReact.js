@@ -123,7 +123,12 @@
   // render React component, with scope[attrs.props] being passed in as the component props
   function renderComponent(component, props, scope, elem) {
     scope.$evalAsync(function() {
-      ReactDOM.render(React.createElement(component, props), elem[0]);
+
+      if (React.isValidElement(component)) {
+        ReactDOM.render(component, elem[0]);
+      } else {
+        ReactDOM.render(React.createElement(component, props), elem[0]);
+      }
     });
   }
 
@@ -207,7 +212,7 @@
   //     <hello name="name"/>
   //
   var reactDirective = function($injector) {
-    return function(reactComponentName, propNames, conf, injectableProps) {
+    return function(reactComponentName, propNames, conf, injectableProps,parentComponent) {
       var directive = {
         restrict: 'E',
         replace: true,
@@ -225,6 +230,19 @@
             });
             props = applyFunctions(props, scope);
             props = angular.extend({}, props, injectableProps);
+
+            if (parentComponent) {
+              var parentReactComponent = React.createElement(
+                  parentComponent.component,
+                  parentComponent.props,
+                  React.createElement(reactComponent,props)
+              );
+
+              reactComponent = parentReactComponent;
+
+              props = parentComponent.props;
+
+            }
             renderComponent(reactComponent, props, scope, elem);
           };
 

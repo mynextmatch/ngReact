@@ -231,7 +231,7 @@
             props = applyFunctions(props, scope);
             props = angular.extend({}, props, injectableProps);
 
-            if (parentComponent) {
+            if (parentComponent && reactComponent.name === 'Connect') {
               var parentReactComponent = React.createElement(
                   parentComponent.component,
                   parentComponent.props,
